@@ -1,98 +1,95 @@
-# PROJEK PORTFOLIO ZAIN AHMAD FAHREZI
+# Liyakhad Ali — Developer Portfolio
 
-Ini adalah proyek React yang dikembangkan menggunakan Vite — sebuah build tool modern dengan performa tinggi, dukungan Hot Module Replacement (HMR), dan waktu pengembangan yang cepat. Proyek ini menampilkan portfolio interaktif dengan elemen 3D dan animasi yang halus.
+Welcome to my personal portfolio repository! This is an interactive, modern portfolio showcasing my projects, certifications, technical skills, and experience in AI, Machine Learning, IoT, and Full Stack Development.
 
-> ⚠️ Proyek ini masih dalam **tahap pengembangan aktif**. Mohon tidak menyalin, menjiplak, atau mendistribusikan ulang sebagian atau seluruh isi proyek ini **tanpa mencantumkan sumber atau izin dari pembuat.**
+Built with **React**, **Vite**, **Three.js / React Three Fiber**, **Tailwind CSS**, and **Supabase**.
 
 ---
 
-## 📆 Teknologi yang Digunakan
+## 🚀 Features
 
-### Core & Frontend
-* ⚛️ [React](https://react.dev/)
-* ⚡ [Vite](https://vitejs.dev/)
-* 💨 [Tailwind CSS](https://tailwindcss.com/)
-* 🧪 [ESLint](https://eslint.org/)
+- **Interactive 3D Elements:** Immersive 3D interactive lanyard and scenes powered by Three.js and React Three Fiber.
+- **Fluid Animations:** Smooth interactions using GSAP, Framer Motion, and Lenis smooth scrolling.
+- **Dynamic Content & Admin Panel:** Integrated with Supabase for managing projects, certificates, messages, and comments.
+- **Modern UI/UX:** Clean, responsive design with dark mode support powered by Tailwind CSS.
+- **Contact System:** Real-time contact and messaging support.
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend & Core
+- **Framework:** [React 18](https://react.dev/)
+- **Build Tool:** [Vite](https://vitejs.dev/)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+- **Icons:** [Lucide React](https://lucide.dev/) & [React Icons](https://react-icons.github.io/react-icons/)
+
+### 3D & Animations
+- **3D Graphics:** [Three.js](https://threejs.org/) & [@react-three/fiber](https://docs.pmnd.rs/react-three-fiber)
+- **Physics & Models:** [@react-three/rapier](https://github.com/pmndrs/react-three-rapier), [@splinetool/react-spline](https://spline.design/)
+- **Motion:** [Framer Motion](https://www.framer.com/motion/), [GSAP](https://greensock.com/gsap/), [Lenis](https://lenis.darkroom.engineering/)
 
 ### Backend & Database
-* 🔥 [Supabase](https://supabase.com/)
-
-### Animasi & 3D
-* 🧊 [Three.js](https://threejs.org/) & [React Three Fiber](https://docs.pmnd.rs/react-three-fiber)
-* 🎬 [Framer Motion](https://www.framer.com/motion/)
-* 🎭 [GSAP](https://greensock.com/gsap/)
+- **Database & Auth:** [Supabase](https://supabase.com/)
 
 ---
 
-## 🛠️ Cara Menjalankan Proyek Ini
+## 💻 Getting Started
 
-1. **Clone repositori ini:**
+### Prerequisites
 
+Ensure you have [Node.js](https://nodejs.org/) (v18 or higher recommended) and `npm` installed.
+
+### Installation
+
+1. **Clone the repository:**
    ```bash
-   git clone https://github.com/username/zain-portofolio.git
-   cd zain-portofolio
+   git clone https://github.com/Liyakhad190/Portfolio.git
+   cd Portfolio
    ```
 
 2. **Install dependencies:**
-
    ```bash
    npm install
    ```
 
-3. **Konfigurasi Environment:**
-
-   Salin file `.env.example` menjadi `.env`:
+3. **Configure Environment Variables:**
+   Copy the example environment file:
    ```bash
    cp .env.example .env
    ```
-   *Pastikan variabel environment untuk Supabase sudah terisi dengan benar.*
+   Open `.env` and fill in your Supabase configuration:
+   ```env
+   VITE_SUPABASE_URL=your_supabase_project_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 
-4. **Jalankan project secara lokal:**
+   # Admin credentials (optional)
+   VITE_ADMIN_USER=your_admin_username
+   VITE_ADMIN_PASS=your_admin_password
+   ```
 
+4. **Run the development server:**
    ```bash
    npm run dev
    ```
+   Open [http://localhost:5173](http://localhost:5173) in your browser to view the application.
 
-   Setelah itu buka browser ke: [http://localhost:5173](http://localhost:5173)
-
-5. **Build untuk produksi (opsional):**
-
+5. **Build for production:**
    ```bash
    npm run build
    ```
+   The compiled assets will be available in the `dist` folder.
 
 ---
 
-## ❗ Hak Cipta & Lisensi
+## 📬 Contact & Connect
 
-Proyek ini adalah karya asli milik **Zain Ahmad Fahrezi** dan hanya diperbolehkan untuk digunakan sebagai referensi pribadi.
-
-🚫 **Dilarang keras menjiplak, mengupload ulang, atau menggunakan sebagian/keseluruhan kode tanpa mencantumkan sumber atau tanpa izin.**
-
-📄 Untuk informasi lisensi atau kerja sama, silakan hubungi saya langsung melalui GitHub.
+- **Portfolio / GitHub:** [github.com/Liyakhad190](https://github.com/Liyakhad190)
+- **LinkedIn:** [linkedin.com/in/liyakhad-ali-780a3132a](https://www.linkedin.com/in/liyakhad-ali-780a3132a)
+- **Email:** [liyakhad2106@gmail.com](mailto:liyakhad2106@gmail.com)
 
 ---
 
-## 📌 Catatan Tambahan
+## 📄 License
 
-Jika kamu ingin mengembangkan proyek ini lebih lanjut atau menggunakan sebagian ide/kodenya, **wajib mencantumkan sumber dengan link ke repositori ini**.
-
-Terima kasih sudah menghargai karya pengembang! 🙏
-
----
-
-## 💖 Dukung Pengembang
-
-Jika kamu merasa proyek ini bermanfaat dan ingin memberikan dukungan:
-
-* 💳 **Dana:** 0896-0433-2830
-* 🏦 **Rekening BRI:** 0342 0107 8321 503 a.n. Zain Ahmad Fahrezi
-* 🅿️ **PayPal:** [paypal.me/zainahmadfahrezi](https://paypal.me/zainahmadfahrezi)
-
-Setiap dukungan sangat berarti dan membantu saya untuk terus mengembangkan proyek-proyek open source lainnya. Terima kasih! 🙌
-
-## 🌐 Sosial Media
-
-* 💼 [LinkedIn](https://www.linkedin.com/in/zainahmadfahrezi)
-* 📸 Instagram: [@zain.ahmadf](https://www.instagram.com/zain.ahmadf)
-* 🎥 TikTok: [@zainahmad.f](https://www.tiktok.com/@zainahmad.f)
+© 2026 **Liyakhad Ali**. All rights reserved.
