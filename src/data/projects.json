@@ -1,0 +1,131 @@
+[
+  {
+    "id": "1",
+    "title": "Portfolio v2",
+    "description": "Personal portfolio website built with React, Next.js, and Tailwind CSS, deployed on Vercel.",
+    "tech": [
+      "Next.js",
+      "React",
+      "TailwindCSS",
+      "Framer Motion"
+    ],
+    "link": "https://github.com/username/portfolio",
+    "image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop",
+    "category": "Web/Apps"
+  },
+  {
+    "id": "2",
+    "title": "E-Commerce API",
+    "description": "RESTful API for an e-commerce platform with authentication, product management, and transaction features.",
+    "tech": [
+      "Node.js",
+      "Express",
+      "MongoDB",
+      "JWT"
+    ],
+    "link": "https://github.com/username/ecommerce-api",
+    "image": "https://images.unsplash.com/photo-1522199755839-a2bacb67c546?q=80&w=2072&auto=format&fit=crop",
+    "category": "Web/Apps"
+  },
+  {
+    "id": "3",
+    "title": "UI Design System",
+    "description": "Designing reusable and consistent UI components for web applications using Figma.",
+    "tech": [
+      "Figma",
+      "Storybook"
+    ],
+    "link": "#",
+    "image": "https://images.unsplash.com/photo-1600132806378-62402124d9e0?q=80&w=2070&auto=format&fit=crop",
+    "category": "Web/Apps"
+  },
+  {
+    "id": "4",
+    "title": "3D Product Visualization",
+    "description": "Interactive 3D design for product showcases using Spline and Blender.",
+    "tech": [
+      "Spline",
+      "Blender"
+    ],
+    "link": "#",
+    "image": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070&auto=format&fit=crop",
+    "category": "AI & IOT"
+  },
+  {
+    "id": "5",
+    "title": "Animated 3D Landing",
+    "description": "Landing page with animated 3D elements for modern branding.",
+    "tech": [
+      "Spline",
+      "Three.js"
+    ],
+    "link": "#",
+    "image": "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?q=80&w=2070&auto=format&fit=crop",
+    "category": "AI & IOT"
+  },
+  {
+    "id": "6",
+    "title": "AR Product Try-On",
+    "description": "Augmented reality try-on experience for e-commerce using WebXR and ARKit, overlaying 3D product meshes on real-world camera feed.",
+    "tech": [
+      "WebXR",
+      "ARKit",
+      "Three.js",
+      "React"
+    ],
+    "link": "#",
+    "image": "https://images.unsplash.com/photo-1617802690992-15d93263d3a9?q=80&w=2070&auto=format&fit=crop",
+    "category": "Web/Apps"
+  },
+  {
+    "id": "7",
+    "title": "VR Training Simulator",
+    "description": "Immersive virtual reality training environment built with Unity and OpenXR for industrial safety drills.",
+    "tech": [
+      "Unity",
+      "OpenXR",
+      "C#",
+      "Blender"
+    ],
+    "link": "#",
+    "image": "https://images.unsplash.com/photo-1592478411213-6153e4ebc07d?q=80&w=2012&auto=format&fit=crop",
+    "category": "AI & IOT"
+  },
+  {
+    "id": "8",
+    "title": "Spatial UI Framework",
+    "description": "Mixed-reality UI framework for head-mounted displays, enabling 3D floating panels with hand-gesture interactions.",
+    "tech": [
+      "WebXR",
+      "Babylon.js",
+      "TypeScript",
+      "HLSL"
+    ],
+    "link": "#",
+    "image": "https://images.unsplash.com/photo-1626379953822-baec19c3accd?q=80&w=2070&auto=format&fit=crop",
+    "category": "AI & IOT"
+  },
+  {
+    "id": "1787848933447",
+    "title": "nigga",
+    "description": "nigga",
+    "tech": [
+      "reasr"
+    ],
+    "link": "sskow",
+    "image": "ssknss",
+    "category": "Web/Apps"
+  },
+  {
+    "id": "1787849857650",
+    "title": "Test Project",
+    "description": "Test Description",
+    "tech": [
+      "React",
+      "Vite"
+    ],
+    "link": "https://example.com",
+    "image": "https://example.com/image.jpg",
+    "category": "Web/Apps"
+  }
+]

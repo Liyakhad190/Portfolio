@@ -1,0 +1,224 @@
+/* Import Google Fonts PERTAMA - sebelum Tailwind */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cascadia+Code&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Font kustom Anda */
+@font-face {
+  font-family: 'Moderniz';
+  src: url(./assets/fonts/Moderniz.otf) format('opentype');
+}
+
+@font-face {
+  font-family: 'Bauhaus93';
+  src: url(./assets/fonts/BAUHS93.ttf) format('truetype');
+}
+
+@layer base {
+
+  /* --- CSS VARIABLES FOR THEME (ELEGANT MINIMALISM) --- */
+  :root {
+    --bg-primary: #FFFFFF;
+    /* #FFFFFF Pure White */
+    --text-primary: #333333;
+    /* #333333 Deep Charcoal */
+    --text-secondary: #707070;
+    /* #707070 Muted Charcoal */
+    --card-bg: #F0F0F0;
+    /* #F0F0F0 Light Gray Card */
+    --card-border: #B0B0B0;
+    /* #B0B0B0 Silver Border */
+    --accent: #333333;
+    --accent-glow: rgba(51, 51, 51, 0.12);
+  }
+
+  /* DARK MODE OVERRIDES (ELEGANT MINIMALISM) */
+  .dark {
+    --bg-primary: #121212;
+    /* Clean Minimalist Dark */
+    --text-primary: #FFFFFF;
+    /* #FFFFFF Pure White */
+    --text-secondary: #B0B0B0;
+    /* #B0B0B0 Silver */
+    --card-bg: #1c1c1c;
+    /* #1c1c1c Soft Charcoal Card */
+    --card-border: #333333;
+    /* #333333 Deep Charcoal Border */
+    --accent: #FFFFFF;
+    /* #FFFFFF Pure White Accent */
+    --accent-glow: rgba(255, 255, 255, 0.12);
+  }
+
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    /* `clip` instead of `hidden`: both stop sideways scrolling, but `hidden`
+       turns the root into a scroll container, which drags `position: fixed`
+       layers (the header, the background canvas) out of the viewport layer and
+       forces a re-raster on every scroll frame. `clip` has no such side effect. */
+    overflow-x: clip;
+  }
+
+  html {
+    overflow-x: clip;
+    scroll-behavior: auto;
+    -webkit-text-size-adjust: 100%; /* prevent iOS font-size bump on rotate */
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  /* Fast tap on mobile — removes 300ms delay */
+  button, a, [role="button"] {
+    touch-action: manipulation;
+  }
+
+
+  .font-poppins {
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .font-cascadia {
+    font-family: 'Cascadia Code', monospace;
+  }
+}
+
+/* --- Gaya untuk Latar Belakang Preloader --- */
+.bg-animated {
+  background: linear-gradient(120deg, #0a0a0a 0%, #111111 40%, #1a1a1a 100%);
+  background-size: 200% 200%;
+  animation: gradientMove 12s ease-in-out infinite;
+}
+
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+
+/* Gaya utilitas asli Anda */
+@layer utilities {
+  @keyframes blink {
+
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes reveal {
+    from {
+      width: 0%;
+    }
+
+    to {
+      width: 100%;
+    }
+  }
+
+  .animate-blink {
+    animation: blink 1s step-end infinite;
+  }
+
+  .animate-fade-in-up {
+    animation: fade-in-up 0.5s forwards;
+  }
+
+  .animate-reveal {
+    animation: reveal 2s linear forwards;
+  }
+}
+
+/* Robot Glow Effects & Watermark Hiding */
+.spline-robot-container {
+  transition: filter 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 0 14px rgba(180, 180, 180, 0.08));
+}
+
+.spline-robot-container:hover {
+  filter: drop-shadow(0 0 32px rgba(160, 160, 160, 0.22));
+}
+
+/* Light Mode: subtle shadow on hover */
+:root:not(.dark) .spline-robot-container:hover {
+  filter: drop-shadow(0 0 28px rgba(100, 100, 100, 0.12));
+}
+
+/* Grey-tone filter: grayscale keeps it monochrome, reduced contrast reveals grey mid-tones,
+   brightness tuned so dark areas stay dark while mid-tones show as visible grey */
+.spline-robot-container canvas {
+  filter: grayscale(1) contrast(1.35) brightness(1.05) saturate(0);
+}
+
+/* ============================================
+   Hide "Built with Spline" watermark globally
+   (Spline injects this badge into the DOM)
+   ============================================ */
+
+/* Target the anchor badge by its href */
+a[href*="spline.design"],
+a[href*="spline.design"] *,
+/* Target by position/style attributes Spline injects */
+div[style*="spline"],
+[class*="spline-watermark"],
+[id*="spline-watermark"] {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Also keep the container-scoped rules as backup */
+.spline-robot-container a,
+.spline-robot-container a[href*="spline.design"],
+.spline-robot-container [style*="logo"],
+.spline-robot-container [style*="shadow"],
+.spline-robot-container div[style*="absolute"]:not(:first-child) {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+
+/* ── Hide "Built with Spline" watermark ── */
+[data-spline-embed] + div,
+.spline-watermark,
+a[href*="spline.design"][target="_blank"] {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
