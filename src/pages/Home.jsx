@@ -123,7 +123,7 @@ const Home = () => {
                 <div ref={lanyardRef} className="hidden lg:flex flex-1 justify-center h-[600px] w-full order-first lg:order-none relative z-10">
                     {is3dEnabled && (
                         <Suspense fallback={Render3DFallback}>
-                            <Lanyard position={[0, 0, 15]} gravity={[0, -40, 0]} fov={18} transparent={true} visible={isLanyardInView} />
+                            <Lanyard position={[0, 0, 15]} gravity={[0, -40, 0]} fov={18} transparent={true} visible={isLanyardInView} containerRef={lanyardRef} />
                         </Suspense>
                     )}
                 </div>
