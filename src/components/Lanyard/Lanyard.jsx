@@ -131,8 +131,8 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
   const isFlipping = useRef(false);
   const lastFlipDir = useRef(1);
 
-  // Rope segment length for proper proportional drop
-  const segLen = 0.38;
+  // Rope segment length for proper medium drop
+  const segLen = 0.44;
 
   // Calculate anchor position based on containerRef in screen space
   const getAnchorPos = useCallback(() => {
@@ -146,15 +146,15 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
       const ndcX = (centerX / window.innerWidth) * 2 - 1;
       const worldX = (ndcX * vWidth) / 2;
 
-      // Top anchor position: enters from top of screen cleanly aligned with container
+      // Top anchor position: enters cleanly from top of viewport aligned with container
       const topY = rect.top;
       const ndcY = -(topY / window.innerHeight) * 2 + 1;
-      const worldY = Math.max((ndcY * vHeight) / 2 + 0.2, vHeight * 0.5 + 0.1);
+      const worldY = Math.max((ndcY * vHeight) / 2 + 0.15, vHeight * 0.5 + 0.05);
 
       return { worldX, worldY };
     }
 
-    return { worldX: vWidth * 0.22, worldY: vHeight * 0.5 + 0.1 };
+    return { worldX: vWidth * 0.22, worldY: vHeight * 0.5 + 0.05 };
   }, [containerRef]);
 
   const initAnchor = useMemo(() => getAnchorPos(), [getAnchorPos]);
@@ -312,11 +312,17 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
           }, true);
         }
       } else if (!dragged) {
-        // Gentle tilt stabilization on X & Z; leave Y free
+        // Natural gentle orientation holding: keep card facing front or back cleanly, never sideways
+        const currentYaw = 2 * Math.atan2(currentRot.y, currentRot.w);
+        let diff = (targetYaw.current - currentYaw) % (Math.PI * 2);
+        if (diff > Math.PI) diff -= Math.PI * 2;
+        if (diff < -Math.PI) diff += Math.PI * 2;
+        const faceRestoreTorque = diff * 4.0;
+
         card.current.setAngvel({
-          x: ang.x - currentRot.x * 0.04,
-          y: ang.y * 0.99,
-          z: ang.z - currentRot.z * 0.04
+          x: ang.x - currentRot.x * 0.05,
+          y: THREE.MathUtils.clamp(ang.y * 0.94 + faceRestoreTorque * delta, -10, 10),
+          z: ang.z - currentRot.z * 0.05
         });
       }
     }
@@ -457,8 +463,8 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
           resolution={[size.width, size.height]}
           useMap
           map={texture}
-          repeat={[-3, 1]}
-          lineWidth={0.32}
+          repeat={[-3.5, 1]}
+          lineWidth={0.52}
         />
       </mesh>
     </>
