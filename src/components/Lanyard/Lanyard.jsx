@@ -131,8 +131,8 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
   const isFlipping = useRef(false);
   const lastFlipDir = useRef(1);
 
-  // Rope segment length for proper medium drop
-  const segLen = 0.44;
+  // Rope segment length increased for a longer, prominent drop
+  const segLen = 0.58;
 
   // Calculate anchor position based on containerRef in screen space
   const getAnchorPos = useCallback(() => {
@@ -463,8 +463,8 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
           resolution={[size.width, size.height]}
           useMap
           map={texture}
-          repeat={[-3.5, 1]}
-          lineWidth={0.52}
+          repeat={[-4.5, 1]}
+          lineWidth={0.68}
         />
       </mesh>
     </>
