@@ -88,7 +88,7 @@ const ang = new THREE.Vector3();
 const dir = new THREE.Vector3();
 
 function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerRef }) {
-  const { camera, gl } = useThree();
+  const { camera, gl, size } = useThree();
   const band = useRef(), fixed = useRef(), j1 = useRef(), j2 = useRef(), j3 = useRef(), card = useRef();
   const cardMesh = useRef();
   const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 1, linearDamping: 4 };
@@ -106,7 +106,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
     ctx.fillStyle = 'white';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font = 'bold 90px "Inter", "Arial", sans-serif';
+    ctx.font = 'bold 85px "Inter", "Arial", sans-serif';
     ctx.fillText('DEVELOPER', canvas.width / 2, canvas.height / 2 + 5);
     const tex = new THREE.CanvasTexture(canvas);
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
@@ -131,6 +131,9 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
   const isFlipping = useRef(false);
   const lastFlipDir = useRef(1);
 
+  // Rope segment length for proper proportional drop
+  const segLen = 0.38;
+
   // Calculate anchor position based on containerRef in screen space
   const getAnchorPos = useCallback(() => {
     const vHeight = 2 * Math.tan((18 * Math.PI / 180) / 2) * 15;
@@ -143,14 +146,15 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
       const ndcX = (centerX / window.innerWidth) * 2 - 1;
       const worldX = (ndcX * vWidth) / 2;
 
+      // Top anchor position: enters from top of screen cleanly aligned with container
       const topY = rect.top;
       const ndcY = -(topY / window.innerHeight) * 2 + 1;
-      const worldY = (ndcY * vHeight) / 2 + 0.6;
+      const worldY = Math.max((ndcY * vHeight) / 2 + 0.2, vHeight * 0.5 + 0.1);
 
       return { worldX, worldY };
     }
 
-    return { worldX: vWidth * 0.22, worldY: vHeight * 0.5 + 0.6 };
+    return { worldX: vWidth * 0.22, worldY: vHeight * 0.5 + 0.1 };
   }, [containerRef]);
 
   const initAnchor = useMemo(() => getAnchorPos(), [getAnchorPos]);
@@ -170,11 +174,11 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
     };
   }, [getAnchorPos]);
 
-  // Rope joints setup
-  useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 1]);
-  useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 1]);
-  useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 1]);
-  useSphericalJoint(j3, card, [[0, 0, 0], [0, 1.50, 0]]);
+  // Rope joints setup with shorter segments
+  useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], segLen]);
+  useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], segLen]);
+  useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], segLen]);
+  useSphericalJoint(j3, card, [[0, 0, 0], [0, 1.45, 0]]);
 
   // Raycasting to dynamically allow pointer events ONLY when hovering or dragging the 3D card
   useEffect(() => {
@@ -330,28 +334,28 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
         position={[initAnchor.worldX, initAnchor.worldY, 0]} 
       />
       <RigidBody 
-        position={[initAnchor.worldX, initAnchor.worldY - 0.9, 0]} 
+        position={[initAnchor.worldX, initAnchor.worldY - segLen, 0]} 
         ref={j1} 
         {...segmentProps}
       >
-        <BallCollider args={[0.1]} />
+        <BallCollider args={[0.08]} />
       </RigidBody>
       <RigidBody 
-        position={[initAnchor.worldX, initAnchor.worldY - 1.8, 0]} 
+        position={[initAnchor.worldX, initAnchor.worldY - segLen * 2, 0]} 
         ref={j2} 
         {...segmentProps}
       >
-        <BallCollider args={[0.1]} />
+        <BallCollider args={[0.08]} />
       </RigidBody>
       <RigidBody 
-        position={[initAnchor.worldX, initAnchor.worldY - 2.7, 0]} 
+        position={[initAnchor.worldX, initAnchor.worldY - segLen * 3, 0]} 
         ref={j3} 
         {...segmentProps}
       >
-        <BallCollider args={[0.1]} />
+        <BallCollider args={[0.08]} />
       </RigidBody>
       <RigidBody 
-        position={[initAnchor.worldX, initAnchor.worldY - 3.8, 0]} 
+        position={[initAnchor.worldX, initAnchor.worldY - segLen * 3 - 1.45, 0]} 
         ref={card} 
         {...segmentProps} 
         type={dragged ? 'kinematicPosition' : 'dynamic'}
@@ -450,11 +454,11 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
         <meshLineGeometry />
         <meshLineMaterial
           color="white"
-          resolution={[1000, 1000]}
+          resolution={[size.width, size.height]}
           useMap
           map={texture}
-          repeat={[-6, 1]}
-          lineWidth={1}
+          repeat={[-3, 1]}
+          lineWidth={0.32}
         />
       </mesh>
     </>
