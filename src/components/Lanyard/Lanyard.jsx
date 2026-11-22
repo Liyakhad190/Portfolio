@@ -153,8 +153,8 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
   const isFlipping = useRef(false);
   const lastFlipDir = useRef(1);
 
-  // Rope segment length slightly decreased for optimal hero placement
-  const segLen = 0.50;
+  // Rope segment length for a clear, visible drop
+  const segLen = 0.55;
 
   // Calculate anchor position based on containerRef in screen space
   const getAnchorPos = useCallback(() => {
@@ -172,10 +172,10 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
       }
     }
 
-    // Base anchor position enters from above the top edge of screen
-    // Moving up with page scroll so it moves off-screen naturally
+    // Anchor starts right at the top edge of the visible screen (vHeight * 0.5 + 0.05)
+    // so the rope is fully visible coming into the screen
     const scrollOffset = typeof window !== 'undefined' ? (window.scrollY / window.innerHeight) * vHeight : 0;
-    const worldY = vHeight * 0.5 + 1.2 + scrollOffset;
+    const worldY = vHeight * 0.5 + 0.05 + scrollOffset;
 
     return { worldX, worldY };
   }, [containerRef]);
@@ -486,8 +486,8 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
           resolution={[size.width, size.height]}
           useMap
           map={texture}
-          repeat={[-4, 1]}
-          lineWidth={0.80}
+          repeat={[-3.5, 1]}
+          lineWidth={0.78}
         />
       </mesh>
     </>
