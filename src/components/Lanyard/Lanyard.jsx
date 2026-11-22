@@ -50,8 +50,8 @@ export default function Lanyard({ containerRef, position = [0, 0, 15], gravity =
     const checkHero = () => {
       if (containerRef?.current) {
         const rect = containerRef.current.getBoundingClientRect();
-        // Hide if hero has scrolled above viewport
-        const isInView = rect.bottom > 80 && rect.top < window.innerHeight;
+        // Visible only while the hero section is in view
+        const isInView = rect.bottom > 60 && rect.top < window.innerHeight;
         setInHeroView(isInView);
       }
     };
@@ -66,18 +66,18 @@ export default function Lanyard({ containerRef, position = [0, 0, 15], gravity =
 
   if (!mounted || typeof document === 'undefined') return null;
 
-  const showCanvas = ready && visible && inHeroView;
+  const isVisible = visible && inHeroView;
 
   return createPortal(
     <LanyardErrorBoundary>
       <div 
-        className={`fixed inset-0 w-screen h-screen z-30 pointer-events-none transition-opacity duration-300 ${showCanvas ? 'opacity-100' : 'opacity-0'}`}
-        style={{ pointerEvents: 'none', display: showCanvas ? 'block' : 'none' }}
+        className={`fixed inset-0 w-screen h-screen z-30 pointer-events-none transition-opacity duration-300 ${ready && isVisible ? 'opacity-100' : 'opacity-0'}`}
+        style={{ pointerEvents: 'none' }}
       >
         <Canvas
           dpr={[1, 1.5]}
           performance={{ min: 0.5 }}
-          frameloop={showCanvas ? "always" : "never"}
+          frameloop={isVisible ? "always" : "never"}
           camera={{ position: position, fov: fov }}
           gl={{ alpha: transparent, antialias: false }}
           style={{ pointerEvents: 'none', width: '100%', height: '100%' }}
@@ -86,9 +86,9 @@ export default function Lanyard({ containerRef, position = [0, 0, 15], gravity =
           }}
         >
           <ambientLight intensity={Math.PI} />
-          <Physics gravity={gravity} timeStep={1 / 60} paused={!showCanvas}>
+          <Physics gravity={gravity} timeStep={1 / 60} paused={!isVisible}>
             <Suspense fallback={null}>
-              <Band visible={showCanvas} onReady={() => setReady(true)} containerRef={containerRef} />
+              <Band visible={isVisible} onReady={() => setReady(true)} containerRef={containerRef} />
             </Suspense>
           </Physics>
           <Environment blur={0.75} resolution={256}>
@@ -162,21 +162,22 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
     const aspect = typeof window !== 'undefined' ? window.innerWidth / window.innerHeight : 16 / 9;
     const vWidth = vHeight * aspect;
 
+    let worldX = vWidth * 0.22;
     if (containerRef?.current) {
       const rect = containerRef.current.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const ndcX = (centerX / window.innerWidth) * 2 - 1;
-      const worldX = (ndcX * vWidth) / 2;
-
-      // Top anchor position: moves up naturally with page scroll so it never hangs down in other sections
-      const topY = rect.top;
-      const ndcY = -(topY / window.innerHeight) * 2 + 1;
-      const worldY = (ndcY * vHeight) / 2 + 0.15;
-
-      return { worldX, worldY };
+      if (rect.width > 0) {
+        const centerX = rect.left + rect.width / 2;
+        const ndcX = (centerX / window.innerWidth) * 2 - 1;
+        worldX = (ndcX * vWidth) / 2;
+      }
     }
 
-    return { worldX: vWidth * 0.22, worldY: vHeight * 0.5 + 0.15 };
+    // Base anchor position enters from above the top edge of screen
+    // Moving up with page scroll so it moves off-screen naturally
+    const scrollOffset = typeof window !== 'undefined' ? (window.scrollY / window.innerHeight) * vHeight : 0;
+    const worldY = vHeight * 0.5 + 1.2 + scrollOffset;
+
+    return { worldX, worldY };
   }, [containerRef]);
 
   const initAnchor = useMemo(() => getAnchorPos(), [getAnchorPos]);
