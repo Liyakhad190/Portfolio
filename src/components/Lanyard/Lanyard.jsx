@@ -39,23 +39,45 @@ class LanyardErrorBoundary extends Component {
 export default function Lanyard({ containerRef, position = [0, 0, 15], gravity = [0, -40, 0], fov = 18, transparent = true, visible = true }) {
   const [ready, setReady] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [inHeroView, setInHeroView] = useState(true);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // Track if hero container is in viewport — completely hides the ID card when scrolled away
+  useEffect(() => {
+    const checkHero = () => {
+      if (containerRef?.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        // Hide if hero has scrolled above viewport
+        const isInView = rect.bottom > 80 && rect.top < window.innerHeight;
+        setInHeroView(isInView);
+      }
+    };
+    checkHero();
+    window.addEventListener('scroll', checkHero, { passive: true });
+    window.addEventListener('resize', checkHero, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', checkHero);
+      window.removeEventListener('resize', checkHero);
+    };
+  }, [containerRef]);
+
   if (!mounted || typeof document === 'undefined') return null;
+
+  const showCanvas = ready && visible && inHeroView;
 
   return createPortal(
     <LanyardErrorBoundary>
       <div 
-        className={`fixed inset-0 w-screen h-screen z-30 pointer-events-none transition-opacity duration-700 ${ready && visible ? 'opacity-100' : 'opacity-0'}`}
-        style={{ pointerEvents: 'none' }}
+        className={`fixed inset-0 w-screen h-screen z-30 pointer-events-none transition-opacity duration-300 ${showCanvas ? 'opacity-100' : 'opacity-0'}`}
+        style={{ pointerEvents: 'none', display: showCanvas ? 'block' : 'none' }}
       >
         <Canvas
           dpr={[1, 1.5]}
           performance={{ min: 0.5 }}
-          frameloop={visible ? "always" : "never"}
+          frameloop={showCanvas ? "always" : "never"}
           camera={{ position: position, fov: fov }}
           gl={{ alpha: transparent, antialias: false }}
           style={{ pointerEvents: 'none', width: '100%', height: '100%' }}
@@ -64,9 +86,9 @@ export default function Lanyard({ containerRef, position = [0, 0, 15], gravity =
           }}
         >
           <ambientLight intensity={Math.PI} />
-          <Physics gravity={gravity} timeStep={1 / 60} paused={!visible}>
+          <Physics gravity={gravity} timeStep={1 / 60} paused={!showCanvas}>
             <Suspense fallback={null}>
-              <Band visible={visible} onReady={() => setReady(true)} containerRef={containerRef} />
+              <Band visible={showCanvas} onReady={() => setReady(true)} containerRef={containerRef} />
             </Suspense>
           </Physics>
           <Environment blur={0.75} resolution={256}>
@@ -131,8 +153,8 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
   const isFlipping = useRef(false);
   const lastFlipDir = useRef(1);
 
-  // Rope segment length increased for a longer, prominent drop
-  const segLen = 0.58;
+  // Rope segment length slightly decreased for optimal hero placement
+  const segLen = 0.50;
 
   // Calculate anchor position based on containerRef in screen space
   const getAnchorPos = useCallback(() => {
@@ -146,15 +168,15 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
       const ndcX = (centerX / window.innerWidth) * 2 - 1;
       const worldX = (ndcX * vWidth) / 2;
 
-      // Top anchor position: enters cleanly from top of viewport aligned with container
+      // Top anchor position: moves up naturally with page scroll so it never hangs down in other sections
       const topY = rect.top;
       const ndcY = -(topY / window.innerHeight) * 2 + 1;
-      const worldY = Math.max((ndcY * vHeight) / 2 + 0.15, vHeight * 0.5 + 0.05);
+      const worldY = (ndcY * vHeight) / 2 + 0.15;
 
       return { worldX, worldY };
     }
 
-    return { worldX: vWidth * 0.22, worldY: vHeight * 0.5 + 0.05 };
+    return { worldX: vWidth * 0.22, worldY: vHeight * 0.5 + 0.15 };
   }, [containerRef]);
 
   const initAnchor = useMemo(() => getAnchorPos(), [getAnchorPos]);
@@ -463,8 +485,8 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
           resolution={[size.width, size.height]}
           useMap
           map={texture}
-          repeat={[-4.5, 1]}
-          lineWidth={0.68}
+          repeat={[-4, 1]}
+          lineWidth={0.80}
         />
       </mesh>
     </>

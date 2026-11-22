@@ -36,7 +36,7 @@ const Home = () => {
     });
 
     const lanyardRef = useRef(null);
-    const isLanyardInView = useInView(lanyardRef, { margin: "0px 0px 200px 0px" });
+    const isLanyardInView = useInView(lanyardRef, { amount: 0.05 });
 
     const splineRef = useRef(null);
     // Not `once`: a Spline scene owns a permanent WebGL render loop, so keeping

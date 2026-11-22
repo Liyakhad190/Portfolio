@@ -108,6 +108,11 @@ export default defineConfig({
       'react-dom',
       'framer-motion',
       'three',
+      '@react-three/fiber',
+      '@react-three/drei',
+      '@react-three/rapier',
+      'meshline',
+      'lucide-react',
       // Pre-bundling Spline's runtime collapses its hundreds of internal ESM
       // files into one request. Excluding it produced a large dev-server
       // request waterfall, which read as a slow, laggy first load.

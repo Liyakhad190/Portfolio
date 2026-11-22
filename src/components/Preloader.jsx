@@ -162,6 +162,15 @@ const LoadingBar = ({ duration }) => {
 const Preloader = ({ onFinished }) => {
   const [fadeOut, setFadeOut] = useState(false);
 
+  useEffect(() => {
+    // Safety fallback: ensure preloader finishes smoothly and never delays the user
+    const timer = setTimeout(() => {
+      setFadeOut(true);
+      setTimeout(onFinished, FADE_MS);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [onFinished]);
+
   const handleCountEnd = () => {
     // Quick delay so the user sees "100%" before fading
     setTimeout(() => {
@@ -178,7 +187,7 @@ const Preloader = ({ onFinished }) => {
         {!fadeOut && (
           <motion.div
             exit={{ opacity: 0, transition: { duration: FADE_MS / 1000, ease: 'easeInOut' } }}
-            className="fixed inset-0 z-50 flex items-center justify-center dark:bg-[#0a0a0a] bg-zinc-50"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-[#0a0a0a]"
           >
             {/* Wide centred column — max-w-sm gives breathing room */}
             <div className="flex flex-col items-center gap-10 w-full max-w-sm px-8">
