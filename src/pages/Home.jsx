@@ -179,7 +179,7 @@ const Home = () => {
                             transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
                             className="md:w-1/3 flex justify-center"
                         >
-                            <div className="w-full h-[480px] md:h-[600px] relative overflow-visible">
+                            <div className="w-full h-[420px] md:h-[530px] relative overflow-visible">
                                 {isSplineInView && hasLoadedSpline.current && (
                                     <Suspense fallback={Render3DFallback}>
                                         <Spline
@@ -188,19 +188,23 @@ const Home = () => {
                                                 width: '100%', 
                                                 height: '100%',
                                                 filter: 'grayscale(100%) brightness(1.1) contrast(1.2)',
-                                                transform: 'scale(1.15)',
-                                                transformOrigin: 'center center',
+                                            }}
+                                            onLoad={(splineApp) => {
+                                                // Remove Spline watermark from DOM after scene loads
+                                                try {
+                                                    const links = document.querySelectorAll('a[href*="spline.design"]');
+                                                    links.forEach(el => { el.style.display = 'none'; el.style.pointerEvents = 'none'; });
+                                                } catch(e) {}
                                             }}
                                         />
                                     </Suspense>
                                 )}
-                                {/* Hide Spline watermark — covers the badge Spline injects bottom-right */}
+                                {/* Opaque cover over Spline watermark badge (bottom-right corner) */}
                                 <div style={{
                                     position: 'absolute', bottom: 0, right: 0,
-                                    width: 210, height: 52,
+                                    width: 220, height: 56,
                                     background: theme === 'dark' ? '#0a0a0a' : '#f8fafc',
                                     zIndex: 10, pointerEvents: 'none',
-                                    borderRadius: '0 0 8px 0',
                                 }} />
                             </div>
                         </motion.div>

@@ -48,14 +48,30 @@ export default function Lanyard({ containerRef, position = [0, 0, 15], gravity =
   // Translate the full-screen canvas wrapper with scrollY using GPU transform
   // so it scrolls naturally with the hero section without jerking physics or overlapping About Me
   useEffect(() => {
+    let rafId = null;
+    let lastScrollY = window.scrollY;
+
     const updateScroll = () => {
+      rafId = null;
+      lastScrollY = window.scrollY;
       if (wrapperRef.current) {
-        wrapperRef.current.style.transform = `translate3d(0, -${window.scrollY}px, 0)`;
+        wrapperRef.current.style.transform = `translate3d(0, -${lastScrollY}px, 0)`;
       }
     };
+
+    const onScroll = () => {
+      if (rafId === null) {
+        rafId = requestAnimationFrame(updateScroll);
+      }
+    };
+
+    // Apply immediately on mount
     updateScroll();
-    window.addEventListener('scroll', updateScroll, { passive: true });
-    return () => window.removeEventListener('scroll', updateScroll);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
   }, []);
 
   if (!mounted || typeof document === 'undefined') return null;
