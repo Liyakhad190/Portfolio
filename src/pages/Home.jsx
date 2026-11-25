@@ -118,10 +118,10 @@ const Home = () => {
                 </div>
 
                 {/* Lanyard 3D ID Card */}
-                <div ref={lanyardRef} className="hidden lg:flex flex-1 justify-center h-[600px] w-full order-first lg:order-none relative z-10">
+                <div ref={lanyardRef} className="hidden lg:flex flex-1 justify-center h-[600px] w-full order-first lg:order-none relative z-10 overflow-visible">
                     {is3dEnabled && (
                         <Suspense fallback={Render3DFallback}>
-                            <Lanyard position={[0, 0, 14]} gravity={[0, -40, 0]} fov={18} transparent={true} visible={isLanyardInView} />
+                            <Lanyard position={[0, 0, 16]} gravity={[0, -40, 0]} fov={20} transparent={true} visible={isLanyardInView} />
                         </Suspense>
                     )}
                 </div>
@@ -162,16 +162,16 @@ const Home = () => {
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true, amount: 0.3 }}
                             transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
-                            className="md:w-1/3 flex justify-center"
+                            className="w-full md:w-5/12 lg:w-1/2 flex justify-center items-center relative"
                         >
-                            <div className="w-full h-[420px] md:h-[530px] relative overflow-hidden" style={{ clipPath: 'inset(0 0 52px 0)' }}>
+                            <div className="w-full h-[460px] md:h-[580px] lg:h-[620px] relative overflow-visible">
                                 {isSplineInView && hasLoadedSpline.current && (
                                     <Suspense fallback={Render3DFallback}>
                                         <Spline
                                             scene="https://prod.spline.design/FcZ66SFMX1YbF-0I/scene.splinecode"
                                             style={{ 
                                                 width: '100%', 
-                                                height: 'calc(100% + 52px)',
+                                                height: '100%',
                                                 filter: 'grayscale(100%) brightness(1.1) contrast(1.2)'
                                             }}
                                         />

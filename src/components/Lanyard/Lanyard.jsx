@@ -35,7 +35,7 @@ class LanyardErrorBoundary extends Component {
   }
 }
 
-export default function Lanyard({ position = [0, 0, 14], gravity = [0, -40, 0], fov = 18, transparent = true, visible = true }) {
+export default function Lanyard({ position = [0, 0, 16], gravity = [0, -40, 0], fov = 20, transparent = true, visible = true }) {
   const [ready, setReady] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -48,8 +48,7 @@ export default function Lanyard({ position = [0, 0, 14], gravity = [0, -40, 0], 
   return (
     <LanyardErrorBoundary>
       <div 
-        className={`relative w-full h-full flex justify-center items-center transition-opacity duration-500 ${ready && visible ? 'opacity-100' : 'opacity-0'}`}
-        style={{ width: '100%', height: '100%' }}
+        className={`absolute -inset-x-24 -top-12 -bottom-12 flex justify-center items-center pointer-events-none transition-opacity duration-500 ${ready && visible ? 'opacity-100' : 'opacity-0'}`}
       >
         <Canvas
           dpr={[1, 1.5]}
@@ -139,8 +138,8 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, fov = 18 }
   const segLen = 0.48;
 
   // Calculate top anchor in local canvas coordinates:
-  // With camera at [0, 0, 14] and vertical FOV `fov`:
-  const vHeight = useMemo(() => 2 * Math.tan((fov * Math.PI / 180) / 2) * 14, [fov]);
+  // With camera at [0, 0, 16] and vertical FOV `fov`:
+  const vHeight = useMemo(() => 2 * Math.tan((fov * Math.PI / 180) / 2) * 16, [fov]);
   // Anchor starts right at top edge of the canvas (vHeight * 0.5 + 0.05)
   const anchorY = useMemo(() => vHeight * 0.5 + 0.05, [vHeight]);
 
