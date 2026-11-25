@@ -149,7 +149,7 @@ const Home = () => {
                 style={{ width: "100vw", position: "relative", left: "50%", right: "50%", marginLeft: "-50vw", marginRight: "-50vw" }}
             >
                 <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.6, ease: "easeOut" }} className="text-center">
-                    <div className="relative flex w-full flex-col items-center justify-center overflow-hidden mb-20">
+                    <div className="relative flex w-full flex-col items-center justify-center overflow-hidden mb-8">
                         {/* White neon ABOUT ME scrolling text */}
                         <VelocityScroll defaultVelocity={3} numRows={1} className="max-w-full">
                             <span className="font-moderniz font-bold" style={{ fontSize: "2.5rem", lineHeight: "1.1", color: theme === 'dark' ? "#ffffff" : "#0891b2", background: "none", WebkitBackgroundClip: "unset", WebkitTextFillColor: "unset", opacity: theme === 'dark' ? 1 : 0.3 }}>
@@ -164,12 +164,12 @@ const Home = () => {
                             </span>
                         </VelocityScroll>
                     </div>
-                    <p className="text-lg dark:text-white/60 text-slate-600 mt-2 font-cascadia px-1 mb-6">
+                    <p className="text-lg dark:text-white/60 text-slate-600 mt-2 font-cascadia px-1 mb-2">
                         ✧ Passionate about AI, Machine Learning &amp; creative technology ✧
                     </p>
                 </motion.div>
 
-                <div className="flex flex-col md:flex-row items-center justify-center">
+                <div className="flex flex-col md:flex-row items-center justify-center max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
                     {is3dEnabled && (
                         <motion.div
                             ref={splineRef}
@@ -177,9 +177,9 @@ const Home = () => {
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true, amount: 0.3 }}
                             transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
-                            className="w-full md:w-[42%] flex justify-center"
+                            className="w-full md:w-[40%] flex justify-center"
                         >
-                            <div className="w-full h-[340px] md:h-[420px] relative overflow-visible">
+                            <div className="w-full h-[380px] md:h-[460px] relative overflow-visible">
                                 {isSplineInView && hasLoadedSpline.current && (
                                     <Suspense fallback={Render3DFallback}>
                                         <Spline
@@ -214,7 +214,7 @@ const Home = () => {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true, amount: 0.3 }}
                         transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
-                        className={`dark:text-white text-slate-800 text-center md:text-left px-4 md:px-8 transition-all duration-700 ${is3dEnabled ? 'md:w-1/2' : 'md:w-2/3'}`}
+                        className={`dark:text-white text-slate-800 text-center md:text-left px-4 md:px-6 transition-all duration-700 ${is3dEnabled ? 'md:w-[58%]' : 'md:w-3/4'}`}
                     >
                         <p className="text-2xl font-moderniz mb-2 uppercase" style={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}>
                             <span className="text-[#e84e44]">HELLO</span>
@@ -241,7 +241,7 @@ const Home = () => {
                 </div>
 
                 {/* Stats Cards */}
-                <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.5, ease: "easeOut", delay: 0.3 }} className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto mt-10 px-4 md:px-0">
+                <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.5, ease: "easeOut", delay: 0.3 }} className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto mt-6 px-4 md:px-8">
                     {stats.map((stat, index) => (
                         <div key={index} className="group relative p-6 rounded-2xl dark:bg-[#111111] bg-[#111111] border dark:border-white/10 border-slate-800 dark:shadow-none shadow-lg transition-all duration-300 hover:border-white/30 hover:shadow-xl dark:hover:shadow-[0_0_24px_0px_rgba(255,255,255,0.15)] cursor-pointer">
                             <div className="flex justify-between items-start">
