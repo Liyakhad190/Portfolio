@@ -16,8 +16,8 @@ const HexagonBackground = () => {
     let animationFrameId = null;
     let running = false;
 
-    // Hexagon settings
-    const hexRadius = 35;
+    // Hexagon settings — larger radius = fewer cells = less fill/stroke work per frame
+    const hexRadius = 48;
     const hexHeight = hexRadius * Math.sqrt(3);
     const hexWidth = hexRadius * 2;
     const horizSpacing = hexWidth * 0.75;
@@ -134,7 +134,8 @@ const HexagonBackground = () => {
       if (!lastTime) lastTime = timestamp;
       const elapsed = timestamp - lastTime;
 
-      if (elapsed > 16) { // Target ~60fps
+      // Target ~30fps for glowing animation to preserve frame budget for WebGL
+      if (elapsed > 33) {
         lastTime = timestamp;
 
         // A full-screen canvas blit per frame is the most expensive thing in the
@@ -287,10 +288,12 @@ const HexagonBackground = () => {
     document.addEventListener('visibilitychange', handleVisibility);
 
     resize();
-    // One static paint up front; the loop only starts on interaction.
+    // One static paint up front; the loop starts ONLY on user interaction
+    // (mouse move / touch), never eagerly on mount — avoids burning GPU budget
+    // during initial page load.
     ctx.drawImage(offscreenCanvas, 0, 0);
     lastDrawWasActive = false;
-    start();
+    // Do NOT call start() eagerly here — wait for real user interaction.
 
     return () => {
       stop();

@@ -39,10 +39,8 @@ const Home = () => {
     const isLanyardInView = useInView(lanyardRef, { amount: 0.05 });
 
     const splineRef = useRef(null);
-    // Not `once`: a Spline scene owns a permanent WebGL render loop, so keeping
-    // it mounted after scrolling past meant that loop ran for the rest of the
-    // session. Load it when it approaches the viewport, drop it when it leaves.
-    const isSplineInView = useInView(splineRef, { margin: "400px 0px 400px 0px" });
+    // Load Spline when near the viewport, drop it when it leaves
+    const isSplineInView = useInView(splineRef, { margin: "150px 0px 150px 0px" });
     const hasLoadedSpline = useRef(false);
     if (isSplineInView) hasLoadedSpline.current = true;
 
@@ -123,7 +121,7 @@ const Home = () => {
                 <div ref={lanyardRef} className="hidden lg:flex flex-1 justify-center h-[600px] w-full order-first lg:order-none relative z-10">
                     {is3dEnabled && (
                         <Suspense fallback={Render3DFallback}>
-                            <Lanyard position={[0, 0, 15]} gravity={[0, -40, 0]} fov={18} transparent={true} visible={isLanyardInView} containerRef={lanyardRef} />
+                            <Lanyard position={[0, 0, 14]} gravity={[0, -40, 0]} fov={18} transparent={true} visible={isLanyardInView} />
                         </Suspense>
                     )}
                 </div>

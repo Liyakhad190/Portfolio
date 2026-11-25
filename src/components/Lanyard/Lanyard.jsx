@@ -1,5 +1,4 @@
-import React, { Component, useEffect, useRef, useState, Suspense, useMemo, useCallback } from 'react';
-import { createPortal } from 'react-dom';
+import React, { Component, useEffect, useRef, useState, Suspense, useMemo } from 'react';
 import { Canvas, extend, useFrame, useThree } from '@react-three/fiber';
 import { useGLTF, useTexture, Environment, Lightformer } from '@react-three/drei';
 import { BallCollider, CuboidCollider, Physics, RigidBody, useRopeJoint, useSphericalJoint } from '@react-three/rapier';
@@ -36,59 +35,37 @@ class LanyardErrorBoundary extends Component {
   }
 }
 
-export default function Lanyard({ containerRef, position = [0, 0, 15], gravity = [0, -40, 0], fov = 18, transparent = true, visible = true }) {
+export default function Lanyard({ position = [0, 0, 14], gravity = [0, -40, 0], fov = 18, transparent = true, visible = true }) {
   const [ready, setReady] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [inHeroView, setInHeroView] = useState(true);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Track if hero container is in viewport — completely hides the ID card when scrolled away
-  useEffect(() => {
-    const checkHero = () => {
-      if (containerRef?.current) {
-        const rect = containerRef.current.getBoundingClientRect();
-        // Visible only while the hero section is in view
-        const isInView = rect.bottom > 60 && rect.top < window.innerHeight;
-        setInHeroView(isInView);
-      }
-    };
-    checkHero();
-    window.addEventListener('scroll', checkHero, { passive: true });
-    window.addEventListener('resize', checkHero, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', checkHero);
-      window.removeEventListener('resize', checkHero);
-    };
-  }, [containerRef]);
-
   if (!mounted || typeof document === 'undefined') return null;
 
-  const isVisible = visible && inHeroView;
-
-  return createPortal(
+  return (
     <LanyardErrorBoundary>
       <div 
-        className={`fixed inset-0 w-screen h-screen z-30 pointer-events-none transition-opacity duration-300 ${ready && isVisible ? 'opacity-100' : 'opacity-0'}`}
-        style={{ pointerEvents: 'none' }}
+        className={`relative w-full h-full flex justify-center items-center transition-opacity duration-500 ${ready && visible ? 'opacity-100' : 'opacity-0'}`}
+        style={{ width: '100%', height: '100%' }}
       >
         <Canvas
           dpr={[1, 1.5]}
           performance={{ min: 0.5 }}
-          frameloop={isVisible ? "always" : "never"}
+          frameloop={visible ? "always" : "never"}
           camera={{ position: position, fov: fov }}
-          gl={{ alpha: transparent, antialias: false }}
-          style={{ pointerEvents: 'none', width: '100%', height: '100%' }}
+          gl={{ alpha: transparent, antialias: false, powerPreference: "high-performance" }}
+          style={{ width: '100%', height: '100%', pointerEvents: 'auto' }}
           onCreated={({ gl }) => {
             gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1);
           }}
         >
           <ambientLight intensity={Math.PI} />
-          <Physics gravity={gravity} timeStep={1 / 60} paused={!isVisible}>
+          <Physics gravity={gravity} timeStep={1 / 60} paused={!visible}>
             <Suspense fallback={null}>
-              <Band visible={isVisible} onReady={() => setReady(true)} containerRef={containerRef} />
+              <Band visible={visible} onReady={() => setReady(true)} fov={fov} />
             </Suspense>
           </Physics>
           <Environment blur={0.75} resolution={256}>
@@ -99,8 +76,7 @@ export default function Lanyard({ containerRef, position = [0, 0, 15], gravity =
           </Environment>
         </Canvas>
       </div>
-    </LanyardErrorBoundary>,
-    document.body
+    </LanyardErrorBoundary>
   );
 }
 
@@ -109,8 +85,8 @@ const vec = new THREE.Vector3();
 const ang = new THREE.Vector3();
 const dir = new THREE.Vector3();
 
-function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerRef }) {
-  const { camera, gl, size } = useThree();
+function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, fov = 18 }) {
+  const { size } = useThree();
   const band = useRef(), fixed = useRef(), j1 = useRef(), j2 = useRef(), j3 = useRef(), card = useRef();
   const cardMesh = useRef();
   const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 1, linearDamping: 4 };
@@ -128,7 +104,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
     ctx.fillStyle = 'white';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font = 'bold 85px "Inter", "Arial", sans-serif';
+    ctx.font = 'bold 90px "Inter", "Arial", sans-serif';
     ctx.fillText('DEVELOPER', canvas.width / 2, canvas.height / 2 + 5);
     const tex = new THREE.CanvasTexture(canvas);
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
@@ -138,14 +114,19 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
   }, []);
 
   const cardTexture = useTexture(cardTexturePath);
-  cardTexture.flipY = false;
-  
-  const [curve] = useState(() => new THREE.CatmullRomCurve3([new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()]));
-  const [dragged, drag] = useState(false);
-  const [hovered, hover] = useState(false);
-  const isDraggingRef = useRef(false);
+  cardTexture.wrapS = cardTexture.wrapT = THREE.ClampToEdgeWrapping;
+  cardTexture.colorSpace = THREE.SRGBColorSpace;
 
-  // Position & Flip Controls
+  const [curve] = useState(() => new THREE.CatmullRomCurve3([
+    new THREE.Vector3(),
+    new THREE.Vector3(),
+    new THREE.Vector3(),
+    new THREE.Vector3()
+  ]));
+
+  const [dragged, drag] = useState(false);
+  const [, hover] = useState(false);
+  const isDraggingRef = useRef(false);
   const lastPointer = useRef({ x: 0, y: 0 });
   const dragVelocity = useRef({ x: 0, y: 0 });
   const pointerDownData = useRef({ x: 0, y: 0, pointX: 0, time: 0 });
@@ -153,105 +134,20 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
   const isFlipping = useRef(false);
   const lastFlipDir = useRef(1);
 
-  // Rope segment length for a clear, visible drop
-  const segLen = 0.55;
+  // Rope segment length for an optimal drop
+  const segLen = 0.48;
 
-  // Calculate anchor position based on containerRef in screen space
-  const getAnchorPos = useCallback(() => {
-    const vHeight = 2 * Math.tan((18 * Math.PI / 180) / 2) * 15;
-    const aspect = typeof window !== 'undefined' ? window.innerWidth / window.innerHeight : 16 / 9;
-    const vWidth = vHeight * aspect;
+  // Calculate top anchor in local canvas coordinates:
+  // With camera at [0, 0, 14] and vertical FOV `fov`:
+  const vHeight = useMemo(() => 2 * Math.tan((fov * Math.PI / 180) / 2) * 14, [fov]);
+  // Anchor starts right at top edge of the canvas (vHeight * 0.5 + 0.05)
+  const anchorY = useMemo(() => vHeight * 0.5 + 0.05, [vHeight]);
 
-    let worldX = vWidth * 0.22;
-    if (containerRef?.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      if (rect.width > 0) {
-        const centerX = rect.left + rect.width / 2;
-        const ndcX = (centerX / window.innerWidth) * 2 - 1;
-        worldX = (ndcX * vWidth) / 2;
-      }
-    }
-
-    // Anchor starts right at the top edge of the visible screen (vHeight * 0.5 + 0.05)
-    // so the rope is fully visible coming into the screen
-    const scrollOffset = typeof window !== 'undefined' ? (window.scrollY / window.innerHeight) * vHeight : 0;
-    const worldY = vHeight * 0.5 + 0.05 + scrollOffset;
-
-    return { worldX, worldY };
-  }, [containerRef]);
-
-  const initAnchor = useMemo(() => getAnchorPos(), [getAnchorPos]);
-  const currentAnchor = useRef(initAnchor);
-
-  // Keep anchor in sync with scroll & window resize
-  useEffect(() => {
-    const update = () => {
-      currentAnchor.current = getAnchorPos();
-    };
-    update();
-    window.addEventListener('resize', update, { passive: true });
-    window.addEventListener('scroll', update, { passive: true });
-    return () => {
-      window.removeEventListener('resize', update);
-      window.removeEventListener('scroll', update);
-    };
-  }, [getAnchorPos]);
-
-  // Rope joints setup with shorter segments
+  // Rope joints setup
   useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], segLen]);
   useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], segLen]);
   useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], segLen]);
   useSphericalJoint(j3, card, [[0, 0, 0], [0, 1.45, 0]]);
-
-  // Raycasting to dynamically allow pointer events ONLY when hovering or dragging the 3D card
-  useEffect(() => {
-    const canvas = gl.domElement;
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-
-    const checkHit = (clientX, clientY) => {
-      if (!visible || !cardMesh.current) return false;
-      mouse.x = (clientX / window.innerWidth) * 2 - 1;
-      mouse.y = -(clientY / window.innerHeight) * 2 + 1;
-      raycaster.setFromCamera(mouse, camera);
-      const hits = raycaster.intersectObjects([cardMesh.current], true);
-      return hits.length > 0;
-    };
-
-    const handlePointerMove = (e) => {
-      if (isDraggingRef.current) {
-        canvas.style.pointerEvents = 'auto';
-        return;
-      }
-      const hit = checkHit(e.clientX, e.clientY);
-      if (hit) {
-        canvas.style.pointerEvents = 'auto';
-        document.body.style.cursor = 'grab';
-        hover(true);
-      } else {
-        canvas.style.pointerEvents = 'none';
-        document.body.style.cursor = 'auto';
-        hover(false);
-      }
-    };
-
-    const handlePointerDown = (e) => {
-      if (isDraggingRef.current) return;
-      if (checkHit(e.clientX, e.clientY)) {
-        canvas.style.pointerEvents = 'auto';
-      }
-    };
-
-    window.addEventListener('pointermove', handlePointerMove, { passive: true });
-    window.addEventListener('pointerdown', handlePointerDown, { passive: true });
-
-    return () => {
-      window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('pointerdown', handlePointerDown);
-      canvas.style.pointerEvents = 'none';
-      document.body.style.cursor = 'auto';
-    };
-  }, [camera, gl.domElement, visible]);
 
   useEffect(() => {
     if (onReady) {
@@ -263,16 +159,10 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
   useFrame((state, delta) => {
     if (!visible) return;
 
-    // Follow scroll position smoothly for the top fixed anchor
-    if (fixed.current && typeof fixed.current.setNextKinematicTranslation === 'function') {
-      fixed.current.setNextKinematicTranslation({
-        x: currentAnchor.current.worldX,
-        y: currentAnchor.current.worldY,
-        z: 0
-      });
-    }
+    // Clamp delta to prevent physics explosion during tab switch or lag spikes
+    const safeDelta = Math.min(Math.max(delta, 0), 0.033);
 
-    // Kinematic translation when dragged across the ENTIRE screen
+    // Kinematic translation when dragged
     if (dragged && card.current && typeof card.current.setNextKinematicTranslation === 'function') {
       vec.set(state.pointer.x, state.pointer.y, 0.5).unproject(state.camera);
       dir.copy(vec).sub(state.camera.position).normalize();
@@ -302,8 +192,14 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
     ) {
       [j1, j2].forEach((ref) => {
         if (!ref.current.lerped) ref.current.lerped = new THREE.Vector3().copy(ref.current.translation());
-        const clampedDistance = Math.max(0.1, Math.min(1, ref.current.lerped.distanceTo(ref.current.translation())));
-        ref.current.lerped.lerp(ref.current.translation(), delta * (minSpeed + clampedDistance * (maxSpeed - minSpeed)));
+        const dist = ref.current.lerped.distanceTo(ref.current.translation());
+        if (dist > 1.2) {
+          ref.current.lerped.copy(ref.current.translation());
+        } else {
+          const clampedDistance = Math.max(0.1, Math.min(1, dist));
+          const lerpAlpha = Math.min(1, Math.max(0, safeDelta * (minSpeed + clampedDistance * (maxSpeed - minSpeed))));
+          ref.current.lerped.lerp(ref.current.translation(), lerpAlpha);
+        }
       });
       curve.points[0].copy(j3.current.translation());
       curve.points[1].copy(j2.current.lerped);
@@ -323,15 +219,19 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
 
         if (Math.abs(diff) < 0.04 && Math.abs(ang.y) < 0.25) {
           isFlipping.current = false;
-          card.current.setAngvel({ x: ang.x - currentRot.x * 0.04, y: 0, z: ang.z - currentRot.z * 0.04 }, true);
+          card.current.setAngvel({
+            x: THREE.MathUtils.clamp(ang.x * 0.9 - currentRot.x * 0.1, -10, 10),
+            y: 0,
+            z: THREE.MathUtils.clamp(ang.z * 0.9 - currentRot.z * 0.1, -10, 10)
+          }, true);
         } else {
           const springTorque = diff * 16;
           const damping = -ang.y * 2.4;
-          const newAngY = THREE.MathUtils.clamp(ang.y + (springTorque + damping) * delta, -30, 30);
+          const newAngY = THREE.MathUtils.clamp(ang.y + (springTorque + damping) * safeDelta, -30, 30);
           card.current.setAngvel({
-            x: ang.x - currentRot.x * 0.04,
+            x: THREE.MathUtils.clamp(ang.x * 0.9 - currentRot.x * 0.1, -10, 10),
             y: newAngY,
-            z: ang.z - currentRot.z * 0.04
+            z: THREE.MathUtils.clamp(ang.z * 0.9 - currentRot.z * 0.1, -10, 10)
           }, true);
         }
       } else if (!dragged) {
@@ -343,9 +243,9 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
         const faceRestoreTorque = diff * 4.0;
 
         card.current.setAngvel({
-          x: ang.x - currentRot.x * 0.05,
-          y: THREE.MathUtils.clamp(ang.y * 0.94 + faceRestoreTorque * delta, -10, 10),
-          z: ang.z - currentRot.z * 0.05
+          x: THREE.MathUtils.clamp(ang.x * 0.92 - currentRot.x * 0.1, -10, 10),
+          y: THREE.MathUtils.clamp(ang.y * 0.94 + faceRestoreTorque * safeDelta, -10, 10),
+          z: THREE.MathUtils.clamp(ang.z * 0.92 - currentRot.z * 0.1, -10, 10)
         });
       }
     }
@@ -359,32 +259,32 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
       <RigidBody 
         ref={fixed} 
         {...segmentProps} 
-        type="kinematicPosition" 
-        position={[initAnchor.worldX, initAnchor.worldY, 0]} 
+        type="fixed" 
+        position={[0, anchorY, 0]} 
       />
       <RigidBody 
-        position={[initAnchor.worldX, initAnchor.worldY - segLen, 0]} 
+        position={[0, anchorY - segLen, 0]} 
         ref={j1} 
         {...segmentProps}
       >
         <BallCollider args={[0.08]} />
       </RigidBody>
       <RigidBody 
-        position={[initAnchor.worldX, initAnchor.worldY - segLen * 2, 0]} 
+        position={[0, anchorY - segLen * 2, 0]} 
         ref={j2} 
         {...segmentProps}
       >
         <BallCollider args={[0.08]} />
       </RigidBody>
       <RigidBody 
-        position={[initAnchor.worldX, initAnchor.worldY - segLen * 3, 0]} 
+        position={[0, anchorY - segLen * 3, 0]} 
         ref={j3} 
         {...segmentProps}
       >
         <BallCollider args={[0.08]} />
       </RigidBody>
       <RigidBody 
-        position={[initAnchor.worldX, initAnchor.worldY - segLen * 3 - 1.45, 0]} 
+        position={[0, anchorY - segLen * 3 - 1.45, 0]} 
         ref={card} 
         {...segmentProps} 
         type={dragged ? 'kinematicPosition' : 'dynamic'}
@@ -401,7 +301,6 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
           onPointerOut={() => {
             if (!isDraggingRef.current) {
               hover(false);
-              gl.domElement.style.pointerEvents = 'none';
               document.body.style.cursor = 'auto';
             }
           }}
@@ -409,7 +308,6 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
             e.stopPropagation();
             e.target.setPointerCapture(e.pointerId);
             isDraggingRef.current = true;
-            gl.domElement.style.pointerEvents = 'auto';
             document.body.style.cursor = 'grabbing';
             isFlipping.current = false;
 
@@ -434,17 +332,16 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerR
             const isClick = Math.hypot(dx, dy) < 10 && dt < 400;
 
             if (isClick && card.current) {
-              // Click detected: flip right or left
               const cardPos = card.current.translation();
               const relX = pointerDownData.current.pointX - cardPos.x;
               
               let dir = lastFlipDir.current;
               if (relX > 0.05) {
-                dir = -1; // Clicked right half -> flip left
+                dir = -1;
               } else if (relX < -0.05) {
-                dir = 1;  // Clicked left half -> flip right
+                dir = 1;
               } else {
-                dir = -dir; // Center click -> alternate flip
+                dir = -dir;
               }
               lastFlipDir.current = dir;
 
