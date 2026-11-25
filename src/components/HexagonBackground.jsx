@@ -16,8 +16,8 @@ const HexagonBackground = () => {
     let animationFrameId = null;
     let running = false;
 
-    // Hexagon settings — larger radius = fewer cells = less fill/stroke work per frame
-    const hexRadius = 48;
+    // Hexagon settings
+    const hexRadius = 35;
     const hexHeight = hexRadius * Math.sqrt(3);
     const hexWidth = hexRadius * 2;
     const horizSpacing = hexWidth * 0.75;

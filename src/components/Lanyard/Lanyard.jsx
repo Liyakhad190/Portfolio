@@ -114,6 +114,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, fov = 18 }
   }, []);
 
   const cardTexture = useTexture(cardTexturePath);
+  cardTexture.flipY = false;
   cardTexture.wrapS = cardTexture.wrapT = THREE.ClampToEdgeWrapping;
   cardTexture.colorSpace = THREE.SRGBColorSpace;
 
