@@ -4,6 +4,7 @@ import { AnimatePresence } from 'framer-motion';
 import Header from './components/Header';
 import Preloader from './components/Preloader';
 import ScrollToTop from './components/ScrollToTop';
+import HexagonBackground from './components/HexagonBackground';
 import { NavbarProvider } from './contexts/NavbarContext';
 import { AdminProvider } from './contexts/AdminContext';
 import { useTheme } from './contexts/ThemeContext';
@@ -24,11 +25,15 @@ function App() {
         <div className="relative min-h-screen dark:bg-[#121212] bg-[#FFFFFF] transition-colors duration-500 overflow-x-clip">
           {isLoading && <Preloader onFinished={() => setIsLoading(false)} />}
           
-          {/* Plain Professional Background with Elegant Minimalism Palette */}
-          <div className="fixed inset-0 z-0 pointer-events-none">
-            <div className="absolute inset-0 dark:bg-[#121212] bg-[#FFFFFF]" />
-            <div className="absolute inset-0 dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(176,176,176,0.05),rgba(18,18,18,0))] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(112,112,112,0.03),rgba(255,255,255,0))]" />
-          </div>
+          {/* Hexagon Interactive Background */}
+          {theme === 'dark' ? (
+            <HexagonBackground />
+          ) : (
+            <div className="fixed inset-0 z-0 pointer-events-none">
+              <div className="absolute inset-0 bg-[#FFFFFF]" />
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(112,112,112,0.03),rgba(255,255,255,0))]" />
+            </div>
+          )}
 
           {!isLoading && <Header />}
 
