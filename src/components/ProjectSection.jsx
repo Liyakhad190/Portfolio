@@ -1,6 +1,6 @@
 // src/components/ProjectSection.jsx
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence, useTime, useTransform } from "framer-motion";
+import { motion, AnimatePresence, useTime, useTransform, useInView } from "framer-motion";
 import {
   FaExternalLinkAlt, FaReact, FaNodeJs, FaHtml5, FaCss3Alt,
   FaJsSquare, FaTools, FaFigma, FaGithub, FaTimes, FaDownload,
@@ -475,6 +475,63 @@ const StackViewModal = ({ category, onClose, onProjectClick }) => {
   );
 };
 
+// Subcomponent for animated skill card with filling progress bar and counter from 0
+const TechCard = ({ tech }) => {
+  const cardRef = useRef(null);
+  const isInView = useInView(cardRef, { once: true, margin: '-50px' });
+  const [displayCount, setDisplayCount] = useState(0);
+
+  useEffect(() => {
+    if (!isInView || !tech.level) return;
+
+    let startTimestamp = null;
+    const duration = 1200;
+
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      setDisplayCount(Math.round(ease * tech.level));
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    };
+
+    const animFrame = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animFrame);
+  }, [isInView, tech.level]);
+
+  return (
+    <div
+      ref={cardRef}
+      className="flex flex-col items-center justify-center gap-4 p-6 sm:p-8 rounded-2xl dark:bg-[#1c1c1c] bg-[#F0F0F0] border dark:border-[#333333] border-[#B0B0B0]/40 shadow-sm"
+    >
+      <div className="text-6xl">{tech.icon}</div>
+      <p className="text-lg font-semibold dark:text-slate-300 text-slate-600 w-full text-center whitespace-normal">{tech.name}</p>
+
+      {tech.level && (
+        <div className="w-full mt-2">
+          <div className="flex justify-between items-center mb-1">
+            <span className="text-[10px] sm:text-xs font-medium dark:text-slate-400 text-slate-500">Proficiency</span>
+            <span className="text-[10px] sm:text-xs font-bold dark:text-white text-slate-800">
+              {displayCount}%
+            </span>
+          </div>
+          <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+            <motion.div
+              className="h-1.5 rounded-full bg-white"
+              initial={{ width: 0 }}
+              animate={isInView ? { width: `${tech.level}%` } : { width: 0 }}
+              transition={{ duration: 1.2, ease: [0.25, 1, 0.5, 1] }}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ===================================
 // KOMPONEN KARTU PROYEK
 // ===================================
@@ -872,28 +929,7 @@ function ProjectSection() {
                       <h3 className="text-2xl font-bold dark:text-[#FFFFFF] text-[#333333] capitalize mb-6 border-b-2 dark:border-[#333333] border-[#B0B0B0]/40 pb-2">{category}</h3>
                       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-8">
                         {techs.map((tech, i) => (
-                          <div
-                            key={i}
-                            className="flex flex-col items-center justify-center gap-4 p-6 sm:p-8 rounded-2xl dark:bg-[#1c1c1c] bg-[#F0F0F0] border dark:border-[#333333] border-[#B0B0B0]/40 shadow-sm"
-                          >
-                            <div className="text-6xl">{tech.icon}</div>
-                            <p className="text-lg font-semibold dark:text-slate-300 text-slate-600 w-full text-center whitespace-normal">{tech.name}</p>
-                            
-                            {tech.level && (
-                              <div className="w-full mt-2">
-                                <div className="flex justify-between items-center mb-1">
-                                  <span className="text-[10px] sm:text-xs font-medium dark:text-slate-400 text-slate-500">Proficiency</span>
-                                  <span className="text-[10px] sm:text-xs font-bold dark:text-white text-slate-800">{tech.level}%</span>
-                                </div>
-                                <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                                  <div
-                                    className="h-1.5 rounded-full bg-white"
-                                    style={{ width: `${tech.level}%` }}
-                                  />
-                                </div>
-                              </div>
-                            )}
-                          </div>
+                          <TechCard key={i} tech={tech} />
                         ))}
                       </div>
                     </div>
