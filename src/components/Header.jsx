@@ -36,11 +36,11 @@ const Header = () => {
       const element = document.getElementById(location.hash.substring(1));
       if (element) {
         setTimeout(() => {
-          element.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
+          element.scrollIntoView({ behavior: 'instant' });
+        }, 50);
       }
     } else if (location.pathname === '/' && !location.hash) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'instant' });
     }
   }, [location]);
 
@@ -54,10 +54,9 @@ const Header = () => {
       if (location.pathname === '/') {
         const element = document.querySelector(href);
         if (element) {
-          element.scrollIntoView({ behavior: 'smooth' });
-          // Update URL hash without reload
-          window.history.pushState(null, '', href);
+          element.scrollIntoView({ behavior: 'instant' });
         }
+        navigate('/' + href);
       } else {
         navigate('/' + href);
       }

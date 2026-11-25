@@ -34,9 +34,9 @@ const Home = () => {
             const timer = setTimeout(() => {
                 const el = document.querySelector(targetId);
                 if (el) {
-                    el.scrollIntoView({ behavior: 'smooth' });
+                    el.scrollIntoView({ behavior: 'instant' });
                 }
-            }, 100);
+            }, 50);
             return () => clearTimeout(timer);
         }
     }, [location.hash]);
@@ -133,13 +133,14 @@ const Home = () => {
                 </div>
 
                 {/* Lanyard 3D ID Card */}
-                <div ref={lanyardRef} className="hidden lg:flex flex-1 justify-center h-[600px] w-full order-first lg:order-none relative z-10 overflow-visible">
-                    {is3dEnabled && (
-                        <Suspense fallback={Render3DFallback}>
+                <div ref={lanyardRef} className="hidden lg:flex flex-1 justify-center h-[600px] w-full order-first lg:order-none pointer-events-none" />
+                {is3dEnabled && (
+                    <div className="hidden lg:block">
+                        <Suspense fallback={null}>
                             <Lanyard position={[0, 0, 15]} gravity={[0, -40, 0]} fov={18} transparent={true} visible={isLanyardInView} containerRef={lanyardRef} />
                         </Suspense>
-                    )}
-                </div>
+                    </div>
+                )}
             </section>
 
             {/* ── ABOUT SECTION ── */}
