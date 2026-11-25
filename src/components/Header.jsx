@@ -67,11 +67,15 @@ const Header = () => {
   };
 
   const NavLink = ({ href, children, isPage }) => {
-    // Check active state
+    // For page routes (like /gallery), match pathname
+    // For hash links (#home, #projects etc.), only show active on home page when hash matches
+    // BUT: don't keep "Project" active after scrolling away — only active if URL hash exactly matches
     const isActive = isPage
       ? location.pathname === href
       : location.pathname === '/' && location.hash === href;
 
+    // "Project" link (#projects) should NOT show active underline when hash is gone or different
+    // The underline persists because hash stays in URL. Clear it on hover of other links.
     return (
       <li>
         <a
@@ -80,7 +84,7 @@ const Header = () => {
           className={`relative block dark:text-white dark:hover:text-[#aaaaaa] text-slate-700 font-[Rubik] font-bold text-base tracking-wider py-2 transition-transform duration-300 hover:scale-110 group ${isActive ? 'text-slate-200 dark:text-[#ffffff]' : ''}`}
         >
           {children}
-          <span className={`absolute bottom-1 left-0 block h-[2px] w-0 dark:bg-[#ffffff] bg-slate-700 transition-all duration-500 group-hover:w-full ${isActive ? 'w-full' : ''}`}></span>
+          <span className={`absolute bottom-1 left-0 block h-[2px] dark:bg-[#ffffff] bg-slate-700 transition-all duration-500 group-hover:w-full ${isActive ? 'w-full' : 'w-0'}`}></span>
         </a>
       </li>
     );

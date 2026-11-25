@@ -168,16 +168,16 @@ const Preloader = ({ onFinished }) => {
     const timer = setTimeout(() => {
       setFadeOut(true);
       setTimeout(onFinished, FADE_MS);
-    }, 4200);
+    }, 5200);
     return () => clearTimeout(timer);
   }, [onFinished]);
 
   const handleCountEnd = () => {
-    // Quick delay so the user sees "100%" before fading
+    // Show "100%" for 600ms so user clearly sees it, then fade out
     setTimeout(() => {
       setFadeOut(true);
       setTimeout(onFinished, FADE_MS);
-    }, 100);
+    }, 600);
   };
 
   return (

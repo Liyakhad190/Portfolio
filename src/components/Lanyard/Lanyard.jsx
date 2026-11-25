@@ -45,6 +45,16 @@ export default function Lanyard({ containerRef, position = [0, 0, 15], gravity =
     setMounted(true);
   }, []);
 
+  // Apply scroll transform immediately via inline style on the element itself before mount
+  // so there's no single-frame flash at position 0 when the page is scrolled
+  const initialTransform = typeof window !== 'undefined'
+    ? `translate3d(0, -${window.scrollY}px, 0)`
+    : 'translate3d(0, 0, 0)';
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Translate the full-screen canvas wrapper with scrollY using GPU transform
   // so it scrolls naturally with the hero section without jerking physics or overlapping About Me
   useEffect(() => {
@@ -80,6 +90,7 @@ export default function Lanyard({ containerRef, position = [0, 0, 15], gravity =
     <LanyardErrorBoundary>
       <div 
         ref={wrapperRef}
+        style={{ transform: initialTransform }}
         className={`fixed inset-0 w-screen h-screen z-30 pointer-events-none transition-opacity duration-500 ${ready && visible ? 'opacity-100' : 'opacity-0'}`}
       >
         <Canvas
