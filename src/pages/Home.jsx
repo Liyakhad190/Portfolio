@@ -177,9 +177,9 @@ const Home = () => {
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true, amount: 0.3 }}
                             transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
-                            className="md:w-1/3 flex justify-center"
+                            className="w-full md:w-[42%] flex justify-center"
                         >
-                            <div className="w-full h-[420px] md:h-[530px] relative overflow-visible">
+                            <div className="w-full h-[340px] md:h-[420px] relative overflow-visible">
                                 {isSplineInView && hasLoadedSpline.current && (
                                     <Suspense fallback={Render3DFallback}>
                                         <Spline
@@ -190,22 +190,21 @@ const Home = () => {
                                                 filter: 'grayscale(100%) brightness(1.1) contrast(1.2)',
                                             }}
                                             onLoad={(splineApp) => {
-                                                // Remove Spline watermark from DOM after scene loads
-                                                try {
-                                                    const links = document.querySelectorAll('a[href*="spline.design"]');
-                                                    links.forEach(el => { el.style.display = 'none'; el.style.pointerEvents = 'none'; });
-                                                } catch(e) {}
+                                                // Disable Spline's WebGL logoOverlayPass watermark
+                                                const hideWatermark = () => {
+                                                    try {
+                                                        if (splineApp?._renderer?.pipeline?.setWatermark) {
+                                                            splineApp._renderer.pipeline.setWatermark(null);
+                                                            splineApp._requestRenderAutoMode?.();
+                                                        }
+                                                    } catch (e) {}
+                                                };
+                                                hideWatermark();
+                                                setTimeout(hideWatermark, 100);
                                             }}
                                         />
                                     </Suspense>
                                 )}
-                                {/* Opaque cover over Spline watermark badge (bottom-right corner) */}
-                                <div style={{
-                                    position: 'absolute', bottom: 0, right: 0,
-                                    width: 220, height: 56,
-                                    background: theme === 'dark' ? '#0a0a0a' : '#f8fafc',
-                                    zIndex: 10, pointerEvents: 'none',
-                                }} />
                             </div>
                         </motion.div>
                     )}

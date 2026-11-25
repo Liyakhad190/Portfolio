@@ -38,20 +38,22 @@ function App() {
           {!isLoading && <Header />}
 
           {/* Page Routing with Transitions & Code Splitting */}
-          <React.Suspense fallback={
-            <div className="min-h-screen flex items-center justify-center">
-              <div className="w-10 h-10 border-4 border-slate-600 border-t-white rounded-full animate-spin"></div>
-            </div>
-          }>
-            <AnimatePresence mode="wait">
-              <Routes location={location} key={location.pathname}>
-                <Route path="/" element={<Home />} />
-                <Route path="/gallery" element={<Gallery />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="/login" element={<Navigate to="/admin" replace />} />
-              </Routes>
-            </AnimatePresence>
-          </React.Suspense>
+          {!isLoading && (
+            <React.Suspense fallback={
+              <div className="min-h-screen flex items-center justify-center">
+                <div className="w-10 h-10 border-4 border-slate-600 border-t-white rounded-full animate-spin"></div>
+              </div>
+            }>
+              <AnimatePresence mode="wait">
+                <Routes location={location} key={location.pathname}>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/gallery" element={<Gallery />} />
+                  <Route path="/admin" element={<Admin />} />
+                  <Route path="/login" element={<Navigate to="/admin" replace />} />
+                </Routes>
+              </AnimatePresence>
+            </React.Suspense>
+          )}
 
           <ScrollToTop />
 
