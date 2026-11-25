@@ -1,4 +1,5 @@
 import React, { Component, useEffect, useRef, useState, Suspense, useMemo, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { Canvas, extend, useFrame, useThree } from '@react-three/fiber';
 import { useGLTF, useTexture, Environment, Lightformer } from '@react-three/drei';
 import { BallCollider, CuboidCollider, Physics, RigidBody, useRopeJoint, useSphericalJoint } from '@react-three/rapier';
@@ -38,17 +39,32 @@ class LanyardErrorBoundary extends Component {
 export default function Lanyard({ containerRef, position = [0, 0, 15], gravity = [0, -40, 0], fov = 18, transparent = true, visible = true }) {
   const [ready, setReady] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const wrapperRef = useRef(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // Translate the full-screen canvas wrapper with scrollY using GPU transform
+  // so it scrolls naturally with the hero section without jerking physics or overlapping About Me
+  useEffect(() => {
+    const updateScroll = () => {
+      if (wrapperRef.current) {
+        wrapperRef.current.style.transform = `translate3d(0, -${window.scrollY}px, 0)`;
+      }
+    };
+    updateScroll();
+    window.addEventListener('scroll', updateScroll, { passive: true });
+    return () => window.removeEventListener('scroll', updateScroll);
+  }, []);
+
   if (!mounted || typeof document === 'undefined') return null;
 
-  return (
+  return createPortal(
     <LanyardErrorBoundary>
       <div 
-        className={`absolute top-0 left-1/2 -translate-x-1/2 w-screen h-screen z-30 pointer-events-none transition-opacity duration-500 ${ready && visible ? 'opacity-100' : 'opacity-0'}`}
+        ref={wrapperRef}
+        className={`fixed inset-0 w-screen h-screen z-30 pointer-events-none transition-opacity duration-500 ${ready && visible ? 'opacity-100' : 'opacity-0'}`}
       >
         <Canvas
           dpr={[1, 1.5]}
@@ -75,7 +91,8 @@ export default function Lanyard({ containerRef, position = [0, 0, 15], gravity =
           </Environment>
         </Canvas>
       </div>
-    </LanyardErrorBoundary>
+    </LanyardErrorBoundary>,
+    document.body
   );
 }
 

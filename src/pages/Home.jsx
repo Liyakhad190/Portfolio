@@ -177,21 +177,19 @@ const Home = () => {
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true, amount: 0.3 }}
                             transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
-                            className="w-full md:w-5/12 lg:w-1/2 flex justify-center items-center relative"
+                            className="md:w-1/3 flex justify-center"
                         >
-                            <div className="w-full h-[460px] md:h-[580px] lg:h-[620px] relative overflow-visible">
+                            <div className="w-full h-[420px] md:h-[530px] relative overflow-visible">
                                 {isSplineInView && hasLoadedSpline.current && (
                                     <Suspense fallback={Render3DFallback}>
-                                        <div className="w-[130%] h-[130%] -ml-[15%] -mt-[15%] pointer-events-auto">
-                                            <Spline
-                                                scene="https://prod.spline.design/FcZ66SFMX1YbF-0I/scene.splinecode"
-                                                style={{ 
-                                                    width: '100%', 
-                                                    height: '100%',
-                                                    filter: 'grayscale(100%) brightness(1.1) contrast(1.2)'
-                                                }}
-                                            />
-                                        </div>
+                                        <Spline
+                                            scene="https://prod.spline.design/FcZ66SFMX1YbF-0I/scene.splinecode"
+                                            style={{ 
+                                                width: '100%', 
+                                                height: '100%',
+                                                filter: 'grayscale(100%) brightness(1.1) contrast(1.2)'
+                                            }}
+                                        />
                                     </Suspense>
                                 )}
                             </div>
