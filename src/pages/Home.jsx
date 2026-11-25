@@ -179,7 +179,7 @@ const Home = () => {
                             transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
                             className="w-full md:w-[40%] flex justify-center"
                         >
-                            <div className="w-full h-[380px] md:h-[460px] relative overflow-visible">
+                            <div className="w-full h-[410px] md:h-[490px] relative overflow-visible">
                                 {isSplineInView && hasLoadedSpline.current && (
                                     <Suspense fallback={Render3DFallback}>
                                         <Spline
