@@ -9,10 +9,28 @@ import { NavbarProvider } from './contexts/NavbarContext';
 import { AdminProvider } from './contexts/AdminContext';
 import { useTheme } from './contexts/ThemeContext';
 
+// Retry dynamic imports once by reloading the page if a new deployment invalidated old chunks
+const lazyWithRetry = (componentImport) =>
+  React.lazy(async () => {
+    const hasRefreshed = JSON.parse(window.sessionStorage.getItem('retry-lazy-refreshed') || 'false');
+    try {
+      const component = await componentImport();
+      window.sessionStorage.setItem('retry-lazy-refreshed', 'false');
+      return component;
+    } catch (error) {
+      if (!hasRefreshed) {
+        window.sessionStorage.setItem('retry-lazy-refreshed', 'true');
+        window.location.reload();
+        return new Promise(() => {});
+      }
+      throw error;
+    }
+  });
+
 // Lazy-loaded Pages for fast initial bundle load
 import Home from './pages/Home';
-const Gallery = React.lazy(() => import('./pages/Gallery'));
-const Admin = React.lazy(() => import('./pages/Admin'));
+const Gallery = lazyWithRetry(() => import('./pages/Gallery'));
+const Admin = lazyWithRetry(() => import('./pages/Admin'));
 
 function App() {
   const { theme } = useTheme();
