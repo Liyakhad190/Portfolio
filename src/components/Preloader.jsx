@@ -4,8 +4,8 @@ import { Github, Linkedin, Instagram } from 'lucide-react';
 import bangzenLogo from '../assets/images/BGZENBGIJObulat.png';
 import CountUp from './CountUp';
 
-const SHOW_MS = 500;
-const FADE_MS = 300;
+const SHOW_MS = 3800;
+const FADE_MS = 600;
 // Social icons appear smoothly alongside progress bar
 const SOCIAL_DELAY_S = 0.2;
 
@@ -26,8 +26,9 @@ const styles = `
 
   @keyframes bar-fill {
     0%   { width: 0%;   }
-    60%  { width: 75%;  }
-    85%  { width: 90%;  }
+    50%  { width: 72%;  }
+    78%  { width: 88%;  }
+    92%  { width: 97%;  }
     100% { width: 100%; }
   }
   @keyframes bar-shimmer {
@@ -167,7 +168,7 @@ const Preloader = ({ onFinished }) => {
     const timer = setTimeout(() => {
       setFadeOut(true);
       setTimeout(onFinished, FADE_MS);
-    }, 1000);
+    }, 4200);
     return () => clearTimeout(timer);
   }, [onFinished]);
 
