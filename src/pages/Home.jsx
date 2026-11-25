@@ -1,4 +1,5 @@
-import React, { useState, useRef, Suspense, lazy } from 'react';
+import React, { useState, useRef, useEffect, Suspense, lazy } from 'react';
+import { useLocation } from 'react-router-dom';
 import { motion, useInView } from "framer-motion";
 import { FaGithub, FaInstagram, FaLinkedin, FaDownload, FaBriefcase, FaCode, FaCertificate, FaGlobe, FaArrowRight, FaCube, FaEnvelope, FaWhatsapp } from 'react-icons/fa';
 import RotatingText from '../components/RotatingText';
@@ -25,6 +26,20 @@ const Render3DFallback = (
 
 const Home = () => {
     const { theme } = useTheme();
+    const location = useLocation();
+
+    useEffect(() => {
+        if (location.hash) {
+            const targetId = location.hash;
+            const timer = setTimeout(() => {
+                const el = document.querySelector(targetId);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, 100);
+            return () => clearTimeout(timer);
+        }
+    }, [location.hash]);
 
     const [is3dEnabled, setIs3dEnabled] = useState(() => {
         if (typeof window !== 'undefined') {
@@ -64,7 +79,7 @@ const Home = () => {
         >
 
             {/* ── HERO SECTION ── */}
-            <section id="home" className="flex flex-col md:flex-row items-center gap-10 pt-20 pb-16 lg:pt-0 lg:pb-20">
+            <section id="home" className="relative flex flex-col md:flex-row items-center gap-10 pt-20 pb-16 lg:pt-0 lg:pb-20">
                 <div className="flex-1 dark:text-white text-slate-800 space-y-6 pt-16 md:pt-40 order-last md:order-none text-center md:text-left flex flex-col items-center md:items-start">
 
                     {/* WELCOME TO MY PORTFOLIO — white neon */}
@@ -121,7 +136,7 @@ const Home = () => {
                 <div ref={lanyardRef} className="hidden lg:flex flex-1 justify-center h-[600px] w-full order-first lg:order-none relative z-10 overflow-visible">
                     {is3dEnabled && (
                         <Suspense fallback={Render3DFallback}>
-                            <Lanyard position={[0, 0, 16]} gravity={[0, -40, 0]} fov={20} transparent={true} visible={isLanyardInView} />
+                            <Lanyard position={[0, 0, 15]} gravity={[0, -40, 0]} fov={18} transparent={true} visible={isLanyardInView} containerRef={lanyardRef} />
                         </Suspense>
                     )}
                 </div>
@@ -167,14 +182,16 @@ const Home = () => {
                             <div className="w-full h-[460px] md:h-[580px] lg:h-[620px] relative overflow-visible">
                                 {isSplineInView && hasLoadedSpline.current && (
                                     <Suspense fallback={Render3DFallback}>
-                                        <Spline
-                                            scene="https://prod.spline.design/FcZ66SFMX1YbF-0I/scene.splinecode"
-                                            style={{ 
-                                                width: '100%', 
-                                                height: '100%',
-                                                filter: 'grayscale(100%) brightness(1.1) contrast(1.2)'
-                                            }}
-                                        />
+                                        <div className="w-[130%] h-[130%] -ml-[15%] -mt-[15%] pointer-events-auto">
+                                            <Spline
+                                                scene="https://prod.spline.design/FcZ66SFMX1YbF-0I/scene.splinecode"
+                                                style={{ 
+                                                    width: '100%', 
+                                                    height: '100%',
+                                                    filter: 'grayscale(100%) brightness(1.1) contrast(1.2)'
+                                                }}
+                                            />
+                                        </div>
                                     </Suspense>
                                 )}
                             </div>

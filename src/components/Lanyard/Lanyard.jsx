@@ -1,4 +1,4 @@
-import React, { Component, useEffect, useRef, useState, Suspense, useMemo } from 'react';
+import React, { Component, useEffect, useRef, useState, Suspense, useMemo, useCallback } from 'react';
 import { Canvas, extend, useFrame, useThree } from '@react-three/fiber';
 import { useGLTF, useTexture, Environment, Lightformer } from '@react-three/drei';
 import { BallCollider, CuboidCollider, Physics, RigidBody, useRopeJoint, useSphericalJoint } from '@react-three/rapier';
@@ -35,7 +35,7 @@ class LanyardErrorBoundary extends Component {
   }
 }
 
-export default function Lanyard({ position = [0, 0, 16], gravity = [0, -40, 0], fov = 20, transparent = true, visible = true }) {
+export default function Lanyard({ containerRef, position = [0, 0, 15], gravity = [0, -40, 0], fov = 18, transparent = true, visible = true }) {
   const [ready, setReady] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -48,7 +48,7 @@ export default function Lanyard({ position = [0, 0, 16], gravity = [0, -40, 0], 
   return (
     <LanyardErrorBoundary>
       <div 
-        className={`absolute -inset-x-24 -top-12 -bottom-12 flex justify-center items-center pointer-events-none transition-opacity duration-500 ${ready && visible ? 'opacity-100' : 'opacity-0'}`}
+        className={`absolute top-0 left-1/2 -translate-x-1/2 w-screen h-screen z-30 pointer-events-none transition-opacity duration-500 ${ready && visible ? 'opacity-100' : 'opacity-0'}`}
       >
         <Canvas
           dpr={[1, 1.5]}
@@ -56,7 +56,7 @@ export default function Lanyard({ position = [0, 0, 16], gravity = [0, -40, 0], 
           frameloop={visible ? "always" : "never"}
           camera={{ position: position, fov: fov }}
           gl={{ alpha: transparent, antialias: false, powerPreference: "high-performance" }}
-          style={{ width: '100%', height: '100%', pointerEvents: 'auto' }}
+          style={{ width: '100%', height: '100%', pointerEvents: 'none' }}
           onCreated={({ gl }) => {
             gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1);
           }}
@@ -64,7 +64,7 @@ export default function Lanyard({ position = [0, 0, 16], gravity = [0, -40, 0], 
           <ambientLight intensity={Math.PI} />
           <Physics gravity={gravity} timeStep={1 / 60} paused={!visible}>
             <Suspense fallback={null}>
-              <Band visible={visible} onReady={() => setReady(true)} fov={fov} />
+              <Band visible={visible} onReady={() => setReady(true)} containerRef={containerRef} fov={fov} />
             </Suspense>
           </Physics>
           <Environment blur={0.75} resolution={256}>
@@ -84,8 +84,8 @@ const vec = new THREE.Vector3();
 const ang = new THREE.Vector3();
 const dir = new THREE.Vector3();
 
-function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, fov = 18 }) {
-  const { size } = useThree();
+function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, containerRef, fov = 18 }) {
+  const { camera, gl, size } = useThree();
   const band = useRef(), fixed = useRef(), j1 = useRef(), j2 = useRef(), j3 = useRef(), card = useRef();
   const cardMesh = useRef();
   const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 1, linearDamping: 4 };
@@ -134,14 +134,84 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, fov = 18 }
   const isFlipping = useRef(false);
   const lastFlipDir = useRef(1);
 
-  // Rope segment length for an optimal drop
-  const segLen = 0.48;
+  // Original rope segment length
+  const segLen = 0.55;
 
-  // Calculate top anchor in local canvas coordinates:
-  // With camera at [0, 0, 16] and vertical FOV `fov`:
-  const vHeight = useMemo(() => 2 * Math.tan((fov * Math.PI / 180) / 2) * 16, [fov]);
-  // Anchor starts right at top edge of the canvas (vHeight * 0.5 + 0.05)
-  const anchorY = useMemo(() => vHeight * 0.5 + 0.05, [vHeight]);
+  // Calculate anchor position horizontally from containerRef (no scroll offset — scrolls naturally with #home)
+  const getAnchorPos = useCallback(() => {
+    const vHeight = 2 * Math.tan((fov * Math.PI / 180) / 2) * 15;
+    const aspect = typeof window !== 'undefined' ? window.innerWidth / window.innerHeight : 16 / 9;
+    const vWidth = vHeight * aspect;
+
+    let worldX = vWidth * 0.22;
+    if (containerRef?.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      if (rect.width > 0) {
+        const centerX = rect.left + rect.width / 2;
+        const ndcX = (centerX / window.innerWidth) * 2 - 1;
+        worldX = (ndcX * vWidth) / 2;
+      }
+    }
+
+    const worldY = vHeight * 0.5 + 0.05;
+    return { worldX, worldY };
+  }, [containerRef, fov]);
+
+  const initAnchor = useMemo(() => getAnchorPos(), [getAnchorPos]);
+
+  // Raycasting to dynamically allow pointer events ONLY when hovering or dragging the 3D card
+  useEffect(() => {
+    const canvas = gl.domElement;
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    const checkHit = (clientX, clientY) => {
+      if (!visible || !cardMesh.current) return false;
+      const rect = canvas.getBoundingClientRect();
+      if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) {
+        return false;
+      }
+      mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+      const hits = raycaster.intersectObjects([cardMesh.current], true);
+      return hits.length > 0;
+    };
+
+    const handlePointerMove = (e) => {
+      if (isDraggingRef.current) {
+        canvas.style.pointerEvents = 'auto';
+        return;
+      }
+      const hit = checkHit(e.clientX, e.clientY);
+      if (hit) {
+        canvas.style.pointerEvents = 'auto';
+        document.body.style.cursor = 'grab';
+        hover(true);
+      } else {
+        canvas.style.pointerEvents = 'none';
+        document.body.style.cursor = 'auto';
+        hover(false);
+      }
+    };
+
+    const handlePointerDown = (e) => {
+      if (isDraggingRef.current) return;
+      if (checkHit(e.clientX, e.clientY)) {
+        canvas.style.pointerEvents = 'auto';
+      }
+    };
+
+    window.addEventListener('pointermove', handlePointerMove, { passive: true });
+    window.addEventListener('pointerdown', handlePointerDown, { passive: true });
+
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerdown', handlePointerDown);
+      canvas.style.pointerEvents = 'none';
+      document.body.style.cursor = 'auto';
+    };
+  }, [camera, gl.domElement, visible]);
 
   // Rope joints setup
   useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], segLen]);
@@ -260,31 +330,31 @@ function Band({ maxSpeed = 50, minSpeed = 0, visible = true, onReady, fov = 18 }
         ref={fixed} 
         {...segmentProps} 
         type="fixed" 
-        position={[0, anchorY, 0]} 
+        position={[initAnchor.worldX, initAnchor.worldY, 0]} 
       />
       <RigidBody 
-        position={[0, anchorY - segLen, 0]} 
+        position={[initAnchor.worldX, initAnchor.worldY - segLen, 0]} 
         ref={j1} 
         {...segmentProps}
       >
         <BallCollider args={[0.08]} />
       </RigidBody>
       <RigidBody 
-        position={[0, anchorY - segLen * 2, 0]} 
+        position={[initAnchor.worldX, initAnchor.worldY - segLen * 2, 0]} 
         ref={j2} 
         {...segmentProps}
       >
         <BallCollider args={[0.08]} />
       </RigidBody>
       <RigidBody 
-        position={[0, anchorY - segLen * 3, 0]} 
+        position={[initAnchor.worldX, initAnchor.worldY - segLen * 3, 0]} 
         ref={j3} 
         {...segmentProps}
       >
         <BallCollider args={[0.08]} />
       </RigidBody>
       <RigidBody 
-        position={[0, anchorY - segLen * 3 - 1.45, 0]} 
+        position={[initAnchor.worldX, initAnchor.worldY - segLen * 3 - 1.45, 0]} 
         ref={card} 
         {...segmentProps} 
         type={dragged ? 'kinematicPosition' : 'dynamic'}
